@@ -21,10 +21,13 @@ In this repository, there is
 * *ragniklein4_prediction_monotoneincreasing.png* = dunamic ANN predictions on monotone increasing sequence, with one hidden layer and 4 nodes and time_step 4
 * *htm_prediction_2.png* = HTM predictions on a monotone increasing sequence, with encoder size 1000 and encoder sparsity 10%, TM 1000 columns and 10 cells per column.
 * *gp_prediction_monotoneincreasing.png* = GP predictions on a monotone increasing sequence, with population = 5000, tournament_size = 10, and generations = 20
+* *gp_prediction_online_monotone_increasing.png* = on-line GP predictions on a monotone increasing sequence, with population = 2000, tournament_size = 5, and generations = 10
 * *gp_prediction_oscillate_without_outlier.png* = GP predictions on oscillating sequence with outlier removed, with population = 5000, tournament_size = 10, and generations = 20
 * *gp_prediction_oscillate_withoutlier.png* = GP predictions on oscillating sequence, with population = 5000, tournament_size = 10, and generations = 20
+* *gp_prediction_online_oscillate.png* = on-line GP predictions on a oscillating sequence, with population = 2000, tournament_size = 5, and generations = 10
 * *gp_program_output.md* = an example of what a program looks like that is created by gplearn
 * *fidelity_all_24sequences.png* = the fidelity of all five methods' predictions on the same 25 sequences
 * *fidelity_all_24sequences_without_outliers.png* = the fidelity of all five methods' predictions on the same 25 sequences, minus outliers
+* *fidelity_all_methods.png* = fidelity of all methods; same as the images above, but includes the on-line GP, rather than vanilla GP with sliding window.
 * *oeis_sequence.py* = a function that computes elements of a sequence from the OEIS
     
