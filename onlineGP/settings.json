@@ -1,0 +1,11 @@
+{
+    "population_size": 50,
+    "tournament_size": 6,
+    "generation_count": 1,
+    "mutation_probability": 1,
+    "crossover_probability": 0.9,
+    "fit_threshold": 0.1,
+    "independent_variables": [[1,2,3],[2,3,-1]],
+    "truth": [[1,0,-1]],
+    "batch_size": 1
+}
