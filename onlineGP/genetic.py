@@ -50,13 +50,22 @@ def main(argv):
         input.fit(independent_variables, truth, batch_size)
         read_file.close()
     if skip_tofile_output:
+        print("Making online GP predictions...")
         validate = input.predict(independent_variables, truth)
-        print("Fidelity on training data: %f" % np.linalg.norm(validate['prediction(s)'] - independent_variables, ord = 1)/ np.linalg.norm(independent_variables, ord = 1))
+        deviation = np.linalg.norm(validate['prediction(s)'] - truth, ord = 1)
+        length = np.linalg.norm(truth, ord = 1)
+        print("Fidelity on training data: " + str(deviation / length))
     else:
+        print("Opening output file")
         with open(output_path, "w") as write_file:
+            print("Making online GP predictions...")
             validate = input.predict(independent_variables, truth)
-            output = "Fidelity on training data: %f" % np.linalg.norm(validate['prediction(s)'] - independent_variables, ord = 1)/ np.linalg.norm(independent_variables, ord = 1)
+            deviation = np.linalg.norm(validate['prediction(s)'] - truth, ord = 1)
+            length = np.linalg.norm(truth, ord = 1)
+            output = "Fidelity on training data: " + str(deviation / length)
+            print("Writing result to output file")
             write_file.write(output)
+            print("Closing output file")
             write_file.close()
     
 if __name__ == "__main__":

@@ -3,7 +3,6 @@ from classes.genetic_management import GeneticManagement
 from classes.symbolic_regression import SymbolicRegression
 
 import numpy as np
-import onlineGP.genetic as gp
 
 
 X= np.array([[1,2,3],[2,3,-1]]).T

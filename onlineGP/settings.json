@@ -1,7 +1,7 @@
 {
-    "population_size": 2000,
-    "tournament_size": 5,
-    "generation_count": 10,
+    "population_size": 50000,
+    "tournament_size": 26,
+    "generation_count": 100,
     "mutation_probability": 0.08,
     "crossover_probability": 0.9,
     "fit_threshold": 0.1,

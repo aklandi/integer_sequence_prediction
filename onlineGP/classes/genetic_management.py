@@ -177,7 +177,8 @@ class GeneticManagement:
                 new_gen.append(mutation)
                 new_gen_depths.append(max(max_depths[i], max_depths[i+1]))
         else:
-
+            if (len(winners) == 1):
+                return (winners, max_depths)
             for i in range(len(winners)-1):
                 new_gen.append(self.mutate(self.crossover(winners[i], winners[i+1]), max_depth = min(self._max_depths[i], self._max_depths[i+1])))
                 new_gen_depths.append(max(self._max_depths[i], self._max_depths[i+1]))

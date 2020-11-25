@@ -60,31 +60,34 @@ class SymbolicRegression:
 
         # with the set of programs that are pre-trained, and with "all" data seen,
         # find the best one through multiple generations
-        next_gen, max_depths = random_instance.population(self.pop_size, selected_programs)
+        next_generation: List[Node] = None
+        max_depths: List[int] = None
+        next_generation, max_depths = random_instance.population(self.pop_size, selected_programs)
         self.genetic_management.set_max_depths(max_depths)
         self.genetic_management.set_independent_variables(X)
         for _ in range(self.n_gen):
             winners: List[Node] = []
             winner_max_depth: List[int] = []
             tournament_configuration.train = True
-            winners, winner_max_depth = self.genetic_management.tournament(next_gen, y, tournament_configuration)
-            next_gen, _ = self.genetic_management.evolve(winners, winner_max_depth, tournament_configuration.train)
-            if len(next_gen) < self.tourn_size:
+            winners, winner_max_depth = self.genetic_management.tournament(next_generation, y, tournament_configuration)
+            next_generation, _ = self.genetic_management.evolve(winners, winner_max_depth, tournament_configuration.train)
+            
+            if len(next_generation) < self.tourn_size:
                 break
 
-        if len(next_gen) > 0:
+        if len(next_generation) > 0:
             best_fit = 2**10; best_fit_indx = 0
-            for k in range(len(next_gen)):
-                tree = next_gen[k]
+            for k in range(len(next_generation)):
+                tree = next_generation[k]
                 t = self.genetic_management.fitness(tree, y)
                 if t < best_fit:
                     best_fit = t
                     best_fit_indx = k
-            self.best_program = next_gen[best_fit_indx]
+            self.best_program = next_generation[best_fit_indx]
             _,s = self.genetic_management.evaluate_tree(self.best_program, X)
             self.best_program_string = s
         else:
-            self.best_program = next_gen
+            self.best_program = next_generation
             _,s = self.genetic_management.evaluate_tree(self.best_program, X)
             self.best_program_string = s
 
@@ -95,6 +98,7 @@ class SymbolicRegression:
         for k in range(n_samples):
             v,s = self.genetic_management.evaluate_tree(self.best_program, X[k,:])
             value.append(v)
+            self.genetic_management.set_independent_variables(X[k,:])
             f.append(self.genetic_management.fitness(self.best_program, y[k,:]))
 
         return {"prediction(s)": np.reshape(np.array(value), y.shape), "fitness": np.array(f)}
