@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from classes.random import Random
 from classes.node import Node
 
-from random import randint, random, sample, uniform
+from random import randint
 from typing import List, Tuple
 
 class PopulationBuilder:
@@ -46,7 +46,9 @@ class PopulationBuilder:
         else:
             programs, program_depth = selected_programs
             selected_programs_length = len(programs)
-            random_max_depths: List[int] = [randint(self._min_depth, self._max_depth) for _ in range(self._population_size-selected_programs_length)] + program_depth
-            POP: List[Node] = [random_instance.program(random_max_depths[k]) for k in range(self._population_size-selected_programs_length)] + programs
+            random_max_depths: List[int] = [randint(self._min_depth, self._max_depth) for _ in range(self._population_size-selected_programs_length)]
+            random_max_depths.extend(program_depth)
+            POP: List[Node] = [random_instance.program(random_max_depths[k]) for k in range(self._population_size-selected_programs_length)]
+            POP.extend(programs)
 
         return (POP, random_max_depths)

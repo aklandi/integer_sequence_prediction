@@ -14,7 +14,6 @@ from random import choice
 from classes.node import Node
 from classes.function_type import FunctionType
 from typing import List
-from typing import NDArray
 from classes.node_type_enum import NodeType
 from classes.node import Node
 
@@ -26,17 +25,17 @@ class FunctionNode(FunctionType, Node):
     children: List[Node] = []
 
     def __init__(self, function, name: str, arity: int):
-        super().__init__(None, name, function, arity)
+        super().__init__('', name, function, arity)
 
     def __str__(self):
         return f"{self.short_name}{() if self.arity == 1 else ({},{})}"
 
-    def evaluate(self, inputs: NDArray[float]) -> float:
+    def evaluate(self, inputs: List[float]) -> float:
         
         if self.arity == 2:
             result = self.function(inputs[0], inputs[1])
         else:
-            result = self.function(inputs)
+            result = self.function(inputs[0])
 
         return result
 

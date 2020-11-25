@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from classes.random import Random
 import abc
 from abc import ABCMeta
-from typing import NDArray
+from nptyping import NDArray
 
 class Node(metaclass=ABCMeta):
     """
@@ -21,13 +21,15 @@ class Node(metaclass=ABCMeta):
     an evaluate function that produces a value at that node given some input,
     and a spawn_children function that produces children nodes
     """
+    def __init__(self) -> None:
+        pass
 
     @abc.abstractmethod
     def __str__(self) -> str:
         pass
 
     @abc.abstractmethod
-    def evaluate(self, inputs: NDArray[int]) -> int:
+    def evaluate(self, inputs: NDArray) -> int:
         pass
 
     @abc.abstractmethod

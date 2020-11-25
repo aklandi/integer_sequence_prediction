@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from classes.random import Random
-from typing import NDArray
+from nptyping import NDArray
 from classes.node import Node
 
 class VariableNode(Node):
@@ -25,7 +25,7 @@ class VariableNode(Node):
         return f"X{self.index}"
 
     # inputs should be numpy array
-    def evaluate(self, inputs: NDArray[int]) -> int:
+    def evaluate(self, inputs: NDArray) -> int:
 
         # either inputs is n rows by m columns
         if len(inputs.shape) > 1:

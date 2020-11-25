@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from classes.random import Random
-from typing import NDArray
+from nptyping import NDArray
 from classes.node import Node
 
 class ConstantNode(Node):
@@ -29,7 +29,7 @@ class ConstantNode(Node):
     def __str__(self):
         return f"{self.function}"
 
-    def evaluate(self, inputs: NDArray[float]) -> float:
+    def evaluate(self, inputs: NDArray) -> float:
         return self.function
 
     def spawn_children(self, max_depth: int, random_instance: Random = None) -> 'ConstantNode':
