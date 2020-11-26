@@ -24,7 +24,7 @@ def protected_log(x):
     return y
 
 def protected_div(a,b):
-    with np.errstate(divide='ignore'):
+    with np.errstate(divide='ignore', invalid ='ignore'):
         y = np.nan_to_num(a/b)
 
     return y

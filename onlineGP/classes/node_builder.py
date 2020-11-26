@@ -15,7 +15,7 @@ from classes.variable_node import VariableNode
 from classes.node import Node
 
 class NodeBuilder:
-    
+
     """
     a class that builds a node, either with type specified or randomized
     """
@@ -36,19 +36,26 @@ class NodeBuilder:
         return self
 
     def build(self, node: NodeType, probability_of_function: float, probability_of_variable: float, max_variable_count: int) -> Node:
+        # if specified type is function, return random function node
         if node == NodeType.Function:
             f = FUNCTION_SET[ sample( list(FUNCTION_SET), self._sample_size)[0]]
             return FunctionNode(f.function, f.short_name, f.arity)
+        # if specified type is constant, return random constant node
         elif node == NodeType.Constant:
             return ConstantNode( uniform(0, self._max_constant) )
+        # if specified type is variable, return random variable node
         elif node == NodeType.Variable:
             return VariableNode(index = randint(0, max_variable_count - 1))
+        # if type is not specified
         else:
+            # check to make sure the node shouldn't be a function node
             if random() < probability_of_function:
                 f = FUNCTION_SET[ sample( list(FUNCTION_SET), self._sample_size)[0]]
                 return FunctionNode(f.function, f.short_name, f.arity)
             else:
+                # if not a function node, check probability it is variable
                 if random() < probability_of_variable:
                     return VariableNode(index = randint(0, max_variable_count- 1))
+                # when those checks fail, it's a constant node
                 else:
                     return ConstantNode( uniform(0, self._max_constant) )

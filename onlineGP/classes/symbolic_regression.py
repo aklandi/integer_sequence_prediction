@@ -7,6 +7,7 @@ References:
 """
 
 from typing import Dict, List, Tuple
+from nptyping import NDArray
 from classes.genetic_management import GeneticManagement
 from classes.node import Node
 from classes.random import Random
@@ -18,7 +19,8 @@ class SymbolicRegression:
 
     genetic_management: GeneticManagement = None
 
-    def __init__(self, pop_size = 100, tourn_size = 5, n_gen = 10, p_mutate = 0.2, p_crossover = 0.8, fit_threshold = 0.01):
+    def __init__(self, pop_size: int = 100, tourn_size: int = 5, n_gen: int = 10, p_mutate: float = 0.2, p_crossover: float = 0.8, fit_threshold: float = 0.01):
+
         self.pop_size = pop_size
         self.tourn_size = tourn_size
         self.n_gen = n_gen
@@ -40,7 +42,18 @@ class SymbolicRegression:
             file.get('fit_threshold')
         )
 
-    def fit(self, X, y, batch_size):
+    #
+    # a function modeled after keras ML to fit the data to a particular program
+    #
+    # X: NDArray = an array containing the data such that each column represents a different variable and each
+    #               row represents a different observation (size n_samples x n_variables)
+    # y: NDArray = an array containing the true outcome for each observation (size n_samples x n_outcomes = 1)
+    # batch_size: int = an integer determining how many observations at a time we use during training
+    #
+    # returns the best program from the population in model.best_program in the form of the center function node
+    #           the string of the best program, print(model.best_program_string) will display the mathematical expression
+    #
+    def fit(self, X: NDArray, y: NDArray, batch_size: int):
 
         n_samples, n_variables = X.shape
         random_instance = Random(0.5, 0.6, n_variables, self.p_mutate, self.p_crossover)
@@ -68,13 +81,14 @@ class SymbolicRegression:
         for _ in range(self.n_gen):
             winners: List[Node] = []
             winner_max_depth: List[int] = []
-            tournament_configuration.train = True
+            tournament_configuration.pretrain = False
             winners, winner_max_depth = self.genetic_management.tournament(next_generation, y, tournament_configuration)
-            next_generation, _ = self.genetic_management.evolve(winners, winner_max_depth, tournament_configuration.train)
-            
+            next_generation, _ = self.genetic_management.evolve(winners, winner_max_depth, tournament_configuration.pretrain)
+
             if len(next_generation) < self.tourn_size:
                 break
 
+        # if evolution left more than one program, then we determine the best among them
         if len(next_generation) > 0:
             best_fit = 2**10; best_fit_indx = 0
             for k in range(len(next_generation)):
@@ -91,10 +105,20 @@ class SymbolicRegression:
             _,s = self.genetic_management.evaluate_tree(self.best_program, X)
             self.best_program_string = s
 
-    def predict(self, X, y):
+    #
+    # a function modeled after keras ML to predict output based on input using the model found in model.fit
+    #
+    # X: NDArray = an array containing the data such that each column represents a different variable and each
+    #               row represents a different observation (size n_samples x n_variables)
+    # y: NDArray = an array containing the true outcome for each observation (size n_samples x n_outcomes = 1)
+    #
+    # returns a dictionary containing the prediction yhat = f(X) and the fitness of this prediction to the truth, y
+    #
+    def predict(self, X: NDArray, y: NDArray):
+
         n_samples, n_variables = X.shape
         value = []; f = []
-        
+
         for k in range(n_samples):
             v,s = self.genetic_management.evaluate_tree(self.best_program, X[k,:])
             value.append(v)

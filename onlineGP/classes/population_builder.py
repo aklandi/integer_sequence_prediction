@@ -39,10 +39,13 @@ class PopulationBuilder:
         self._population_size = size
         return self
 
+    # builds a population of random programs
     def build(self, random_instance: Random, selected_programs: Tuple[List[Node], List[int]] = None) -> Tuple[List[Node], List[int]]:
+        # check to see if we are starting from scratch
         if selected_programs is None:
             random_max_depths = [randint(self._min_depth, self._max_depth) for _ in range(self._population_size)]
             POP =  [random_instance.program(random_max_depths[k])for k in range(self._population_size)]
+        # if not, concatonate the programs from a pre-training step to a new random subpopulation
         else:
             programs, program_depth = selected_programs
             selected_programs_length = len(programs)

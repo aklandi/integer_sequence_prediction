@@ -46,11 +46,11 @@ class GeneticManagement:
 
         values: List[float] = []
         function_string = [center_node.short_name , "(", "\t"]
-        
+
         for index, child in enumerate(center_node.children):
             if index == 1:
                 function_string.append(", ")
-            
+
             if isinstance(child, FunctionNode):
                 value, _function_string = self.evaluate_tree(child, inputs)
                 values.append(np.array(value))
@@ -71,7 +71,7 @@ class GeneticManagement:
     def fitness(self, random_program: FunctionNode, y: NDArray) -> float:
 
         value, _ = self.evaluate_tree(random_program, self._independent_variables)
-        
+
         fit: float or NDArray = 0.0
         if np.isscalar(value):
             temp = value*np.ones(y.shape)
@@ -87,7 +87,7 @@ class GeneticManagement:
         y: NDArray,
         config: TournamentConfiguration
     ) -> Tuple[List, List]:
-        
+
         winners = []; fit = []; maxdep = []
         random_index = sample([i for i in range(len(population))], len(population))
 
@@ -96,13 +96,16 @@ class GeneticManagement:
             fit.append(f)
 
         for i in range(0, len(population), config.tournament_size):
-
+            # randomly compete
             idx = random_index[i:(i+config.tournament_size)]
+            # determine programs with best fitness
             f = np.argsort([fit[k] for k in idx])
+            # if fitness is less than threshold, this program is the winner
             if f[0] < config.fit_threshold:
                 winners.append(population[idx[f[0]]])
                 maxdep.append(self._max_depths[idx[f[0]]])
             else:
+            # otherwise, choose the best two
                 win1 = population[idx[f[0]]]
                 win2 = population[idx[f[1]]]
                 w1_depth = self._max_depths[idx[f[0]]]
@@ -110,11 +113,13 @@ class GeneticManagement:
                 winners.extend([win1, win2])
                 maxdep.extend([w1_depth, w2_depth])
 
-                if config.train is False:
+                # during pre-training of population, also add the next generation
+                # of the two winners
+                if config.pretrain is True:
                     child, c_max_d = self.evolve(
                         [win1, win2],
                         [w1_depth, w2_depth],
-                        config.train
+                        config.pretrain
                     )
                     winners.append(child[0])
                     maxdep.append(c_max_d[0])
@@ -163,12 +168,12 @@ class GeneticManagement:
 
             return program1
 
-    def evolve(self, winners, max_depths = None, train: bool = False) -> Tuple[List[Node], List[int]]:
+    def evolve(self, winners, max_depths = None, pretrain: bool = False) -> Tuple[List[Node], List[int]]:
 
         new_gen = []
         new_gen_depths = []
 
-        if train is False:
+        if pretrain is True:
 
             for i in range(len(winners)-1):
                 max_d = min(max_depths[i], max_depths[i+1])
@@ -176,7 +181,9 @@ class GeneticManagement:
                 mutation = self.mutate(crossover, max_d)
                 new_gen.append(mutation)
                 new_gen_depths.append(max(max_depths[i], max_depths[i+1]))
+
         else:
+
             if (len(winners) == 1):
                 return (winners, max_depths)
             for i in range(len(winners)-1):
