@@ -1,1 +1,1 @@
-done
+Fidelity on training data: 0.1951757982131445

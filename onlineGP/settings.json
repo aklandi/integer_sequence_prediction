@@ -1,8 +1,8 @@
 {
-    "population_size": 50,
-    "tournament_size": 6,
-    "generation_count": 1,
-    "mutation_probability": 1,
+    "population_size": 50000,
+    "tournament_size": 26,
+    "generation_count": 100,
+    "mutation_probability": 0.08,
     "crossover_probability": 0.9,
     "fit_threshold": 0.1,
     "independent_variables": [[1,2,3],[2,3,-1]],

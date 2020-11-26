@@ -6,12 +6,17 @@ References:
 (1) Segaran, Toby. 2007. Programming collective intelligence (First. ed.). O'Reilly. Chapter 11: Evolving Intelligence.
 """
 
-from typing import Dict
+from typing import Dict, List, Tuple
 from classes.genetic_management import GeneticManagement
+from classes.node import Node
 from classes.random import Random
 import numpy as np
 
+from classes.tournament_configuration import TournamentConfiguration
+
 class SymbolicRegression:
+
+    genetic_management: GeneticManagement = None
 
     def __init__(self, pop_size = 100, tourn_size = 5, n_gen = 10, p_mutate = 0.2, p_crossover = 0.8, fit_threshold = 0.01):
         self.pop_size = pop_size
@@ -38,54 +43,62 @@ class SymbolicRegression:
     def fit(self, X, y, batch_size):
 
         n_samples, n_variables = X.shape
-        random_instance = Random(0.5, 0.6, n_variables)
-        selected_programs = None
-        genetic_management = GeneticManagement(random_instance)
-        
+        random_instance = Random(0.5, 0.6, n_variables, self.p_mutate, self.p_crossover)
+        selected_programs: Tuple[List[Node], List[int]] = ([], [])
+        self.genetic_management = GeneticManagement(random_instance)
+        tournament_configuration = TournamentConfiguration(self.fit_threshold, self.tourn_size)
+
         # pre-trains the population incrementally on the data
         for i in range(0, n_samples, batch_size):
             population, max_depths = random_instance.population(self.pop_size, selected_programs)
-            genetic_management.set_max_depths(max_depths)
-            genetic_management.set_independent_variables(X[i:(i+batch_size),:])
-            win, w_max_depths = genetic_management.tournament(population, y[i:(i+batch_size)], self.fit_threshold, self.tourn_size, self.p_mutate, self.p_crossover)
-            selected_programs = [win, w_max_depths]
+            self.genetic_management.set_max_depths(max_depths)
+            self.genetic_management.set_independent_variables(X[i:(i+batch_size),:])
+            winners: List[Node] = []
+            winner_max_depth: List[int] = []
+            winners, winner_max_depth = self.genetic_management.tournament(population, y[i:(i+batch_size)], tournament_configuration)
+            selected_programs = (winners, winner_max_depth)
 
         # with the set of programs that are pre-trained, and with "all" data seen,
         # find the best one through multiple generations
-        next_gen, max_depths = random_instance.population(self.pop_size, selected_programs)
-        genetic_management.set_max_depths(max_depths)
-        genetic_management.set_independent_variables(X)
-        for g in range(self.n_gen):
-            win, w_max_depths = genetic_management.tournament(next_gen, y, self.fit_threshold, self.tourn_size, self.p_mutate, self.p_crossover, train = 1)
-            next_gen, next_gen_depths = genetic_management.evolve(winners = win, p_mutate = self.p_mutate, p_crossover = self.p_crossover, train = 1)
-            if len(next_gen) < self.tourn_size:
+        next_generation: List[Node] = None
+        max_depths: List[int] = None
+        next_generation, max_depths = random_instance.population(self.pop_size, selected_programs)
+        self.genetic_management.set_max_depths(max_depths)
+        self.genetic_management.set_independent_variables(X)
+        for _ in range(self.n_gen):
+            winners: List[Node] = []
+            winner_max_depth: List[int] = []
+            tournament_configuration.train = True
+            winners, winner_max_depth = self.genetic_management.tournament(next_generation, y, tournament_configuration)
+            next_generation, _ = self.genetic_management.evolve(winners, winner_max_depth, tournament_configuration.train)
+            
+            if len(next_generation) < self.tourn_size:
                 break
 
-        if len(next_gen) > 0:
+        if len(next_generation) > 0:
             best_fit = 2**10; best_fit_indx = 0
-            for k in range(len(next_gen)):
-                tree = next_gen[k]
-                t = genetic_management.fitness(tree, y)
+            for k in range(len(next_generation)):
+                tree = next_generation[k]
+                t = self.genetic_management.fitness(tree, y)
                 if t < best_fit:
                     best_fit = t
                     best_fit_indx = k
-            self.best_program = next_gen[best_fit_indx]
-            v,s = genetic_management.evaluate_tree(self.best_program, X)
+            self.best_program = next_generation[best_fit_indx]
+            _,s = self.genetic_management.evaluate_tree(self.best_program, X)
             self.best_program_string = s
         else:
-            self.best_program = next_gen
-            v,s = genetic_management.evaluate_tree(self.best_program, X)
+            self.best_program = next_generation
+            _,s = self.genetic_management.evaluate_tree(self.best_program, X)
             self.best_program_string = s
 
     def predict(self, X, y):
         n_samples, n_variables = X.shape
-        random_instance = Random(0.5, 0.6, n_variables)
-        genetic_management = GeneticManagement(random_instance)
         value = []; f = []
         
         for k in range(n_samples):
-            v,s = genetic_management.evaluate_tree(self.best_program, X[k,:])
+            v,s = self.genetic_management.evaluate_tree(self.best_program, X[k,:])
             value.append(v)
-            f.append(genetic_management.fitness(self.best_program, y[k,:]))
+            self.genetic_management.set_independent_variables(X[k,:])
+            f.append(self.genetic_management.fitness(self.best_program, y[k,:]))
 
         return {"prediction(s)": np.reshape(np.array(value), y.shape), "fitness": np.array(f)}

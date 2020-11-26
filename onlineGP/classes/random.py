@@ -21,10 +21,19 @@ class Random:
     A class for random production of nodes, programs, and populations for GP.
     """
 
-    def __init__(self, probability_of_function: float = 0.5, probability_of_variable: float = 0.78, max_variable_count: int = 2):
+    def __init__(
+        self,
+        probability_of_function: float = 0.5,
+        probability_of_variable: float = 0.78,
+        max_variable_count: int = 2,
+        probability_of_mutation: float = 0.08,
+        probability_of_crossover: float = 0.9
+    ):
         self.probability_of_function = probability_of_function
         self.probability_of_variable = probability_of_variable
         self.max_variable_count = max_variable_count
+        self.probability_of_mutation = probability_of_mutation
+        self.probability_of_crossover = probability_of_crossover
 
     def node(self, node: NodeType) -> Node:
         return NodeBuilder().build(node, self.probability_of_function, self.probability_of_variable, self.max_variable_count)
